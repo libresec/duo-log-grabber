@@ -6,7 +6,7 @@ setup(
     version=__version__,
     description='Retrieves logs from Duo Security API and sends CEF-compliant syslog messages.',
     author='Joe Aguirre',
-    url=''
+    url='https://github.com/libresec/duo_log_grabber/',
     license='GPLv3+',
     install_requires=['duo_client', 'netsyslog'],
     dependency_links=[
