@@ -20,14 +20,10 @@ a header, and an extension, as shown here:
 
 '''
 from __future__ import print_function
-__version__ = '0.1'
-
 from datetime import datetime
 import calendar
 import ConfigParser
 import duo_client
-#import netsyslog
-#import syslog
 from loggerglue.emitter import UDPSyslogEmitter
 import socket
 
@@ -51,8 +47,6 @@ def send_syslog(cef):
     '''
     Sends syslog messages to the server specified in conf.ini.
     '''
-    #logger.log(syslog.LOG_USER, syslog.LOG_NOTICE, cef)
-
     l.emit(cef)
 
 def log_to_cef(eventtype, action, **kwargs):
@@ -67,7 +61,6 @@ def log_to_cef(eventtype, action, **kwargs):
         extension.extend([key + kwargs[key]])
     
     msg = header + ' '.join(extension)
-
     cef = ' '.join([syslog_header, msg])
     
     send_syslog(cef)
@@ -149,9 +142,6 @@ if __name__ == "__main__":
         syslog_date = datetime.now()
         syslog_date_time = syslog_date.strftime("%b %d %I:%M:%S")
         syslog_header = ' '.join([syslog_date_time, HOSTNAME])
-
-        #logger = netsyslog.Logger()
-        #logger.add_host(SYSLOG_SERVER)
         
         l = UDPSyslogEmitter(address=(SYSLOG_SERVER, 514))
 
