@@ -89,7 +89,7 @@ def get_logs():
         # timestamp is converted to milliseconds for CEF
         # repr is used to keep '\\' in the domain\username
         extension = {
-            'duser=': repr(entry['username']).strip("u'"),,
+            'duser=': repr(entry['username']).strip("u'"),
             'rt=': str(entry['timestamp']*1000),
             'description=': str(entry.get('description')),
             'dhost=': entry['host'],
