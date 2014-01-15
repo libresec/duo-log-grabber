@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 from duo_log_grabber import __version__
 
 setup(
