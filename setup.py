@@ -1,5 +1,5 @@
 from distutils.core import setup
-from Duo_Log_Grabber import __version__
+from duo_log_grabber import __version__
 
 setup(
     name='Duo_Log_Grabber',
