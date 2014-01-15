@@ -131,7 +131,7 @@ if __name__ == "__main__":
         HOSTNAME = socket.gethostname()
 
         SYSLOG_SERVER = config.get('syslog', 'SYSLOG_SERVER')
-        SYSLOG_PORT = config.get('syslog', 'SYSLOG_PORT')
+        SYSLOG_PORT = config.getint('syslog', 'SYSLOG_PORT')
 
         DEBUG = config.getboolean('debug', 'DEBUG')
         DEBUG_FILE = config.get('debug', 'DEBUG_FILE')
