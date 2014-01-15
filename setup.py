@@ -8,7 +8,7 @@ setup(
     author='Joe Aguirre',
     url='https://github.com/libresec/duo_log_grabber/',
     license='GPLv3+',
-    install_requires=['duo_client', 'loggerglue'],
+    install_requires=['duo_client', 'loggerglue', 'setuptools'],
     dependency_links=['https://github.com/duosecurity/duo_client_python/tarball/master'],
     classifiers=[
         'Development Status :: 4 - Beta',
