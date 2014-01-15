@@ -1,6 +1,0 @@
-setup.py
-duo_log_grabber.egg-info/PKG-INFO
-duo_log_grabber.egg-info/SOURCES.txt
-duo_log_grabber.egg-info/dependency_links.txt
-duo_log_grabber.egg-info/requires.txt
-duo_log_grabber.egg-info/top_level.txt

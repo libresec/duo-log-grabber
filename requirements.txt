@@ -1,0 +1,2 @@
+duo-client==2.1
+loggerglue==1.0
