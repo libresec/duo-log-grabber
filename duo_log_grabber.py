@@ -88,7 +88,7 @@ def get_logs():
     for entry in admin_log:
         extension = {
             'username=': entry['username'],
-            'start=': str(entry['timestamp']),
+            'rt=': str(entry['timestamp']),
             'description=': str(entry.get('description')),
             'dhost=': entry['host'],
         }
@@ -98,7 +98,7 @@ def get_logs():
     for entry in auth_log:
         # repr is used to keep '\\' in the domain\username
         extension = {
-            'start=': str(entry['timestamp']),
+            'rt=': str(entry['timestamp']),
             'src=': entry['ip'],
             'dhost=': entry['host'],
             'duser=': repr(entry['username']).strip("u'"),
