@@ -7,8 +7,9 @@ a SIEM or log management solution.
 
 # Installation
 
-1. Download the zip archive: https://github.com/libresec/duo_log_grabber/archive/master.zip.
+1. Download the zip archive: https://github.com/libresec/duo_log_grabber/archive/master.zip
 2. pip install -r requirements.txt
+3. update the conf.ini file
 
 # Notes
 
