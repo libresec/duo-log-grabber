@@ -5,6 +5,11 @@ This is a utility that will leverage the Duo Security API (https://www.duosecuri
 This could used used to with a scheduled job to import Duo Security logs into
 a SIEM or log management solution.
 
+# Installation
+
+1. Download the zip archive: https://github.com/libresec/duo_log_grabber/archive/master.zip.
+2. pip install -r requirements.txt
+
 # Notes
 
 Pay attention to the conf.ini file. Many important value are set, including:
@@ -19,7 +24,7 @@ Pay attention to the conf.ini file. Many important value are set, including:
 The following modules are used:
 
 - duo_client (2.1) - https://github.com/duosecurity/duo_client_python
-- netsyslog (0.1.0) - https://github.com/gma/python-netsyslog
+- loggerglue (1.0) - https://pypi.python.org/pypi/loggerglue/1.0
 
 Only tested on Python 2.7.6. 
 
