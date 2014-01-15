@@ -1,2 +1,2 @@
-duo-client==2.1
+https://github.com/duosecurity/duo_client_python/zipball/master#egg=duo_client_python-2.1
 loggerglue==1.0
