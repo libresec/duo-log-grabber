@@ -1,0 +1,2 @@
+duo_client_python
+loggerglue
