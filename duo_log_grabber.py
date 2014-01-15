@@ -131,6 +131,7 @@ if __name__ == "__main__":
         HOSTNAME = socket.gethostname()
 
         SYSLOG_SERVER = config.get('syslog', 'SYSLOG_SERVER')
+        SYSLOG_PORT = config.get('syslog', 'SYSLOG_PORT')
 
         DEBUG = config.getboolean('debug', 'DEBUG')
         DEBUG_FILE = config.get('debug', 'DEBUG_FILE')
@@ -143,7 +144,7 @@ if __name__ == "__main__":
         syslog_date_time = syslog_date.strftime("%b %d %I:%M:%S")
         syslog_header = ' '.join([syslog_date_time, HOSTNAME])
         
-        l = UDPSyslogEmitter(address=(SYSLOG_SERVER, 514))
+        l = UDPSyslogEmitter(address=(SYSLOG_SERVER, SYSLOG_PORT))
 
         get_logs()
 
