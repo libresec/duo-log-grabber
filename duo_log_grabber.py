@@ -86,8 +86,10 @@ def get_logs():
         auth_log = admin_api.get_authentication_log(mintime=mintime)
 
     for entry in admin_log:
+        # timestamp is converted to milliseconds for CEF
+        # repr is used to keep '\\' in the domain\username
         extension = {
-            'username=': entry['username'],
+            'duser=': repr(entry['username']).strip("u'"),,
             'rt=': str(entry['timestamp']*1000),
             'description=': str(entry.get('description')),
             'dhost=': entry['host'],
@@ -96,6 +98,7 @@ def get_logs():
         log_to_cef(entry['eventtype'], entry['action'], **extension)
 
     for entry in auth_log:
+        # timestamp is converted to milliseconds for CEF
         # repr is used to keep '\\' in the domain\username
         extension = {
             'rt=': str(entry['timestamp']*1000),
