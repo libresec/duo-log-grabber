@@ -66,7 +66,7 @@ def log_to_cef(eventtype, action, **kwargs):
     send_syslog(cef)
 
 
-def get_logs():
+def get_logs(proxy=None, proxy_port=None):
     '''
     Connects to the DuoSecurity API and grabs the admin
     and auth logs, which are then parsed and passed to
@@ -76,6 +76,9 @@ def get_logs():
         ikey=INTEGRATION_KEY,
         skey=SECRET_KEY,
         host=API_HOST)
+    
+    if proxy and proxy_port:
+        admin_api.set_proxy(proxy, proxy_port)
 
     # Check to see if DELTA is 0. If so, retrieve all logs.
     if mintime == utc_date:
@@ -125,6 +128,8 @@ if __name__ == "__main__":
         SECRET_KEY = config.get('api', 'SECRET_KEY')
         API_HOST = config.get('api', 'API_HOST')
         DELTA = config.getint('api', 'DELTA')
+        PROXY_SERVER = config.get('api', 'PROXY_SERVER')
+        PROXY_PORT = config.getint('api', 'PROXY_PORT')
 
         VENDOR = config.get('cef', 'VENDOR')
         PRODUCT = config.get('cef', 'PRODUCT')
@@ -149,7 +154,7 @@ if __name__ == "__main__":
         
         l = UDPSyslogEmitter(address=(SYSLOG_SERVER, SYSLOG_PORT))
 
-        get_logs()
+        get_logs(proxy=PROXY_SERVER, proxy_port=PROXY_PORT)
 
     except Exception, e:
         with open('exceptions.log', 'a+') as exception_file:
