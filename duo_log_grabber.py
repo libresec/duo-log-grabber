@@ -128,8 +128,12 @@ if __name__ == "__main__":
         SECRET_KEY = config.get('api', 'SECRET_KEY')
         API_HOST = config.get('api', 'API_HOST')
         DELTA = config.getint('api', 'DELTA')
-        PROXY_SERVER = config.get('api', 'PROXY_SERVER')
-        PROXY_PORT = config.getint('api', 'PROXY_PORT')
+
+        PROXY_ENABLE = config.getboolean('proxy', 'PROXY_ENABLE')
+
+        if PROXY_ENABLE:
+            PROXY_SERVER = config.get('proxy', 'PROXY_SERVER')
+            PROXY_PORT = config.getint('proxy', 'PROXY_PORT')
 
         VENDOR = config.get('cef', 'VENDOR')
         PRODUCT = config.get('cef', 'PRODUCT')
@@ -154,7 +158,10 @@ if __name__ == "__main__":
         
         l = UDPSyslogEmitter(address=(SYSLOG_SERVER, SYSLOG_PORT))
 
-        get_logs(proxy=PROXY_SERVER, proxy_port=PROXY_PORT)
+        if PROXY_ENABLE:
+            get_logs(proxy=PROXY_SERVER, proxy_port=PROXY_PORT)
+        else:
+            get_logs()
 
     except Exception, e:
         with open('exceptions.log', 'a+') as exception_file:
