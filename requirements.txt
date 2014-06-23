@@ -1,2 +1,2 @@
-https://github.com/duosecurity/duo_client_python/zipball/master#egg=duo_client_python-2.1
+git+git://github.com/duosecurity/duo_client_python.git
 loggerglue==1.0
