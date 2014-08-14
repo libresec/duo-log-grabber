@@ -153,7 +153,7 @@ if __name__ == "__main__":
         mintime = utc_date - DELTA
 
         syslog_date = datetime.now()
-        syslog_date_time = syslog_date.strftime("%b %d %I:%M:%S")
+        syslog_date_time = syslog_date.strftime("%b %d %H:%M:%S")
         syslog_header = ' '.join([syslog_date_time, HOSTNAME])
         
         l = UDPSyslogEmitter(address=(SYSLOG_SERVER, SYSLOG_PORT))
