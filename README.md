@@ -1,9 +1,6 @@
 # About
 
-This is a utility that will leverage the Duo Security API (https://www.duosecurity.com/docs) and pulls both the admin and authentication logs and then write CEF-compliant syslog messages to an arbitrary server.
-
-This could used used to with a scheduled job to import Duo Security logs into
-a SIEM or log management solution.
+This utility leverages the Duo Security API (https://www.duosecurity.com/docs) to consume both the admin and authentication logs, and write CEF-compliant syslog messages to an arbitrary server. Use this incombination with a scheduled job to import Duo Security logs into a SIEM or log management solution.
 
 # Installation
 
