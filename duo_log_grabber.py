@@ -92,7 +92,7 @@ def get_logs(proxy=None, proxy_port=None):
         # timestamp is converted to milliseconds for CEF
         # repr is used to keep '\\' in the domain\username
         extension = {
-            'duser=': repr(entry['username']).strip("u'"),
+            'duser=': repr(entry['username']).lstrip("u").strip("'"),
             'rt=': str(entry['timestamp']*1000),
             'description=': str(entry.get('description')),
             'dhost=': entry['host'],
@@ -107,7 +107,7 @@ def get_logs(proxy=None, proxy_port=None):
             'rt=': str(entry['timestamp']*1000),
             'src=': entry['ip'],
             'dhost=': entry['host'],
-            'duser=': repr(entry['username']).strip("u'"),
+            'duser=': repr(entry['username']).lstrip("u").strip("'"),
             'outcome=': entry['result'],
             'cs1Label=': 'new_enrollment',
             'cs1=': str(entry['new_enrollment']),
