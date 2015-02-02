@@ -86,7 +86,7 @@ def get_logs(proxy=None, proxy_port=None):
     '''
     Connects to the DuoSecurity API and grabs the admin
     and auth logs, which are then parsed and passed to
-    log)to_cef().
+    log_to_cef().
     '''
     admin_api = duo_client.Admin(
         ikey=INTEGRATION_KEY,
