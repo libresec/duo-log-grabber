@@ -42,9 +42,9 @@ from loggerglue.emitter import UDPSyslogEmitter
 import socket
 
 
-def print_cef(func):
+def print_msg(func):
     '''
-    Decorator which wraps send_syslog() and prints all CEF
+    Decorator which wraps send_syslog() and prints all
     messages to the file specified in conf.ini.
     '''
     def wrapper(*args, **kwargs):
@@ -57,12 +57,12 @@ def print_cef(func):
     return wrapper
 
 
-@print_cef
-def send_syslog(cef):
+@print_msg
+def send_syslog(msg):
     '''
     Sends syslog messages to the server specified in conf.ini.
     '''
-    l.emit(cef)
+    l.emit(msg)
 
 
 def log_to_cef(eventtype, action, **kwargs):
