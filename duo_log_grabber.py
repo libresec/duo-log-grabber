@@ -1,4 +1,4 @@
-'''
+"""
 Grabs the administration and authentication logs from the Duo Security
 API and sends CEF-compliant syslog messages.
 
@@ -18,7 +18,26 @@ a header, and an extension, as shown here:
     Sep 19 08:26:10 host CEF:0|Security|threatmanager|1.0|100|worm
     successfully stopped|10|src=10.0.0.1 dst=2.1.2.2 spt=1232
 
-'''
+Logging format (TSV):
+For other systems that parse and store syslog, a simple line of TSV is easy
+to parse out. The way fields are tab separated assume that there won't be
+any commas in the fields.
+
+Fields are laid out as follows for a TSV log line - auth_logs:
+
+    timestamp\tduo_event_type\tsrcip\tfactor\tusername\tresult\tintegration
+
+Example auth_log:
+
+    Jul 02 08:59:44\tduo_auth_log\t129.21.206.5\tDuo Push\tsapt\tSUCCESS\tVPN
+
+NOTE -
+Auth_logs are completely built out - work still needs to be done for admim
+logs. I (RyPeck) am switching to using LEEF format for QRadar however, so
+someone else will have to pick that up if they want it.
+"""
+
+
 from __future__ import print_function
 from datetime import datetime
 import calendar
@@ -26,11 +45,12 @@ import ConfigParser
 import duo_client
 from loggerglue.emitter import UDPSyslogEmitter
 import socket
+import time
 
 
-def print_cef(func):
+def print_msg(func):
     '''
-    Decorator which wraps send_syslog() and prints all CEF
+    Decorator which wraps send_syslog() and prints all
     messages to the file specified in conf.ini.
     '''
     def wrapper(*args, **kwargs):
@@ -43,36 +63,129 @@ def print_cef(func):
     return wrapper
 
 
-@print_cef
-def send_syslog(cef):
+@print_msg
+def send_syslog(msg):
     '''
     Sends syslog messages to the server specified in conf.ini.
     '''
-    l.emit(cef)
+    l.emit(msg)
 
 
-def log_to_cef(eventtype, action, **kwargs):
+def log_to_cef(entry, entry_type):
     '''
     Args are formatted as a CEF-compliant message and then
     passed to send_syslog().
     '''
-    header = '|'.join([CEF_VERSION, VENDOR, PRODUCT, VERSION,
-                       eventtype, action, SEVERITY]) + '|'
-    extension = []
-    for key in kwargs:
-        extension.extend([key + kwargs[key]])
+    eventtype = entry['eventtype']
 
-    msg = header + ' '.join(extension)
+    # For auth logs these are the same for some reason...
+    if entry_type == "admin_log":
+        action = entry['action']
+
+        # timestamp is converted to milliseconds for CEF
+        # repr is used to keep '\\' in the domain\username
+        extension = {
+            'duser=': repr(entry['username']).lstrip("u").strip("'"),
+            'rt=': str(entry['timestamp']*1000),
+            'description=': str(entry.get('description')),
+            'dhost=': entry['host'],
+        }
+
+    elif entry_type == "auth_log":
+        action = entry['eventtype']
+
+        # timestamp is converted to milliseconds for CEF
+        # repr is used to keep '\\' in the domain\username
+        extension = {
+            'rt=': str(entry['timestamp']*1000),
+            'src=': entry['ip'],
+            'dhost=': entry['host'],
+            'duser=': repr(entry['username']).lstrip("u").strip("'"),
+            'outcome=': entry['result'],
+            'cs1Label=': 'new_enrollment',
+            'cs1=': str(entry['new_enrollment']),
+            'cs2Label=': 'factor',
+            'cs2=': entry['factor'],
+            'ca3Label=': 'integration',
+            'cs3=': entry['integration'],
+        }
+
+    header = '|'.join([CEF_VERSION, VENDOR, PRODUCT, VERSION,
+                      eventtype, action, SEVERITY]) + '|'
+
+    extension_list = []
+    for key in extension:
+        extension_list.extend([key + extension[key]])
+
+    msg = header + ' '.join(extension_list)
     cef = ' '.join([syslog_header, msg])
 
     send_syslog(cef)
+
+
+def log_to_tsv(entry, entry_type):
+    """
+    Log an event in tab separated values.
+
+    Order for each event is as specified by the order variable
+    """
+    # Send timestamp for the entry to syslog
+    timestamp = time.strftime('%b %d %H:%M:%S',
+                              time.localtime(entry['timestamp']))
+
+    if entry_type == "admin_log":
+        data = {
+            'duser': repr(entry['username']).lstrip("u").strip("'"),
+            'description': str(entry.get('description')),
+            'dhost': entry['host'],
+            'action': entry['action'],
+        }
+
+        order = [
+            'duser',
+            'dhost',
+            'description',
+            'action',
+            ]
+
+    elif entry_type == "auth_log":
+        data = {
+            'ip': entry['ip'],
+            'factor': entry['factor'],
+            'user': repr(entry['username']).lstrip("u").strip("'"),
+            'result': entry['result'],
+            'integration': entry['integration'],
+            }
+
+        order = [
+            'ip',
+            'factor',
+            'user',
+            'result',
+            'integration',
+            ]
+
+    syslog_line = timestamp + ' ' + HOSTIP + '\tduo_' + entry_type + '\t' + \
+        '\t'.join([data[x] for x in order])
+
+    send_syslog(syslog_line)
+
+
+def log_event(entry, entry_type):
+    """
+    Log an individual entry
+    """
+    if LOG_METHOD == "cef":
+        log_to_cef(entry, entry_type)
+    elif LOG_METHOD == "tsv":
+        log_to_tsv(entry, entry_type)
 
 
 def get_logs(proxy=None, proxy_port=None):
     '''
     Connects to the DuoSecurity API and grabs the admin
     and auth logs, which are then parsed and passed to
-    log)to_cef().
+    log_to_cef().
     '''
     admin_api = duo_client.Admin(
         ikey=INTEGRATION_KEY,
@@ -91,35 +204,10 @@ def get_logs(proxy=None, proxy_port=None):
         auth_log = admin_api.get_authentication_log(mintime=mintime)
 
     for entry in admin_log:
-        # timestamp is converted to milliseconds for CEF
-        # repr is used to keep '\\' in the domain\username
-        extension = {
-            'duser=': repr(entry['username']).lstrip("u").strip("'"),
-            'rt=': str(entry['timestamp'] * 1000),
-            'description=': str(entry.get('description')),
-            'dhost=': entry['host'],
-        }
-
-        log_to_cef(entry['eventtype'], entry['action'], **extension)
+        log_event(entry, 'admin_log')
 
     for entry in auth_log:
-        # timestamp is converted to milliseconds for CEF
-        # repr is used to keep '\\' in the domain\username
-        extension = {
-            'rt=': str(entry['timestamp'] * 1000),
-            'src=': entry['ip'],
-            'dhost=': entry['host'],
-            'duser=': repr(entry['username']).lstrip("u").strip("'"),
-            'outcome=': entry['result'],
-            'cs1Label=': 'new_enrollment',
-            'cs1=': str(entry['new_enrollment']),
-            'cs2Label=': 'factor',
-            'cs2=': entry['factor'],
-            'ca3Label=': 'integration',
-            'cs3=': entry['integration'],
-        }
-
-        log_to_cef(entry['eventtype'], entry['eventtype'], **extension)
+        log_event(entry, 'auth_log')
 
 if __name__ == "__main__":
     try:
@@ -143,9 +231,12 @@ if __name__ == "__main__":
         SEVERITY = config.get('cef', 'SEVERITY')
         CEF_VERSION = config.get('cef', 'CEF_VERSION')
         HOSTNAME = socket.gethostname()
+        HOSTIP = socket.gethostbyname(HOSTNAME)
 
         SYSLOG_SERVER = config.get('syslog', 'SYSLOG_SERVER')
         SYSLOG_PORT = config.getint('syslog', 'SYSLOG_PORT')
+
+        LOG_METHOD = config.get('logging', 'LOG_METHOD')
 
         DEBUG = config.getboolean('debug', 'DEBUG')
         DEBUG_FILE = config.get('debug', 'DEBUG_FILE')
@@ -164,7 +255,10 @@ if __name__ == "__main__":
             get_logs(proxy=PROXY_SERVER, proxy_port=PROXY_PORT)
         else:
             get_logs()
+        if DEBUG:
+            with open(DEBUG_FILE, 'a+') as debug_file:
+                print("Ran at %s" % date, file=debug_file)
 
-    except Exception, e:
+    except Exception as e:
         with open('exceptions.log', 'a+') as exception_file:
             print(datetime.utcnow(), e, file=exception_file)
