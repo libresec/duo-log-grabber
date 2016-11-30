@@ -6,7 +6,7 @@ This utility leverages the Duo Security API (https://www.duosecurity.com/docs) t
 
 1. download the zip archive
 2. pip install -r requirements.txt
-3. update the conf.ini file
+3. Copy `conf.ini.template` to `conf.ini` and configure with your settings.
 
 # Notes
 
